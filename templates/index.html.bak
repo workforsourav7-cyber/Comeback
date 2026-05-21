@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Store - Buy Premium Accounts</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <i class="fas fa-store"></i>
+                <span>AccountStore</span>
+            </a>
+            
+            <div class="search-box">
+                <form action="/search" method="get">
+                    <input type="text" name="q" placeholder="Search by Item ID or Name..." 
+                           value="{{ search_query if search_query else '' }}">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+            
+            <div class="nav-links">
+                <a href="#"><i class="fas fa-fire"></i> Hot Deals</a>
+                <a href="#"><i class="fas fa-star"></i> Top Sellers</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Slider -->
+    <section class="hero">
+        <div class="slider">
+            <div class="slide active">
+                <div class="slide-content">
+                    <h2>Premium Accounts Marketplace</h2>
+                    <p>Buy verified accounts instantly with guaranteed delivery</p>
+                </div>
+            </div>
+            <div class="slide">
+                <div class="slide-content">
+                    <h2>Instant Delivery</h2>
+                    <p>Get your account credentials immediately after purchase</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Items Grid -->
+    <main class="container">
+        <div class="section-header">
+            <h2>Available Accounts</h2>
+            <p>Click on any item to view details</p>
+        </div>
+        
+        <div class="items-grid">
+            {% for item in items %}
+            <div class="item-card" onclick="window.location.href='/item/{{ item.id }}'">
+                <div class="item-image">
+                    <img src="{{ item.image }}" alt="{{ item.name }}">
+                    <div class="item-badge">
+                        <i class="fas fa-check-circle"></i> Verified
+                    </div>
+                </div>
+                <div class="item-info">
+                    <h3 class="item-name">{{ item.name }}</h3>
+                    <div class="item-id">ID: {{ item.id }}</div>
+                    <div class="item-price">${{ "%.2f"|format(item.price) }}</div>
+                    <div class="item-region">
+                        <i class="fas fa-globe"></i> {{ item.region }}
+                    </div>
+                    <button class="view-btn">View Details <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if not items %}
+        <div class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <h3>No items available</h3>
+            <p>Check back later for new accounts</p>
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 AccountStore. All rights reserved.</p>
+            <p>Instant account delivery guaranteed</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
