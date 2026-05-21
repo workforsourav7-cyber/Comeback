@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - AccountStore</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-container {
+            padding: 20px;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .admin-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .admin-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-admin {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .items-list {
+            margin-top: 20px;
+        }
+        
+        .item-row {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto auto;
+            gap: 15px;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        
+        .code-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            margin-bottom: 8px;
+            border-radius: 5px;
+        }
+        
+        .used {
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1><i class="fas fa-cogs"></i> Admin Panel</h1>
+            <p>Manage items, accounts, and redeem codes</p>
+        </div>
+        
+        <!-- Admin Actions -->
+        <div class="admin-cards">
+            <div class="admin-card">
+                <h2><i class="fas fa-plus-circle"></i> Add New Item</h2>
+                <p>Create new account listing with all details</p>
+                <div class="btn-group">
+                    <a href="/admin/add_item" class="btn-admin btn-primary">
+                        <i class="fas fa-plus"></i> Add Item
+                    </a>
+                </div>
+            </div>
+            
+            <div class="admin-card">
+                <h2><i class="fas fa-gift"></i> Create Redeem Code</h2>
+                <p>Generate new redeem codes for discounts</p>
+                <div class="btn-group">
+                    <button class="btn-admin btn-success" onclick="createRedeem()">
+                        <i class="fas fa-magic"></i> Generate Code
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="admin-card">
+            <h2><i class="fas fa-chart-bar"></i> Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <i class="fas fa-box" style="color: #667eea;"></i>
+                    <div>
+                        <strong>{{ items|length }}</strong>
+                        <div>Total Items</div>
+                    </div>
+                </div>
+                {% for item_id, stat in stats.items() %}
+                <div class="stat-item">
+                    <i class="fas fa-users"></i>
+                    <div>
+                        <strong>ID: {{ item_id[:6] }}...</strong>
+                        <div>{{ stat.online }} Online / {{ stat.offline }} Offline</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Items List -->
+        <div class="admin-card">
+            <h2><i class="fas fa-list"></i> All Items</h2>
+            <div class="items-list">
+                {% for item in items %}
+                <div class="item-row">
+                    <img src="{{ item.image }}" alt="{{ item.name }}" style="width: 50px; height: 50px; border-radius: 5px;">
+                    <div>
+                        <strong>{{ item.name }}</strong>
+                        <div>ID: {{ item.id }} | ${{ item.price }}</div>
+                    </div>
+                    <div>{{ item.region }}</div>
+                    <div>{{ item.created_at[:10] }}</div>
+                    <button class="btn-admin btn-danger" onclick="deleteItem('{{ item.id }}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Redeem Codes -->
+        <div class="admin-card">
+            <h2><i class="fas fa-ticket-alt"></i> Redeem Codes</h2>
+            <div>
+                {% for code in redeem_codes %}
+                <div class="code-item {% if code.used %}used{% endif %}">
+                    <div>
+                        <code>{{ code.code }}</code>
+                        <div>${{ code.amount }} | {{ code.created_at[:10] }}</div>
+                    </div>
+                    <div>
+                        {% if code.used %}
+                        <span style="color: #f44336;">Used</span>
+                        {% else %}
+                        <span style="color: #4CAF50;">Active</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function createRedeem() {
+            const amount = prompt('Enter redeem code amount ($):');
+            if (!amount || isNaN(amount)) return;
+            
+            fetch('/admin/create_redeem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `amount=${amount}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(`Redeem code created: ${data.code}`);
+                location.reload();
+            });
+        }
+        
+        function deleteItem(itemId) {
+            if (confirm('Are you sure you want to delete this item?')) {
+                fetch(`/admin/delete_item/${itemId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Item deleted successfully');
+                        location.reload();
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
