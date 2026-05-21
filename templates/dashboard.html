@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dashboard — UID/JWT Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0a0608;
+            --surface: #120a0c;
+            --card: #1a0e10;
+            --border: rgba(232,48,74,0.15);
+            --accent: #e8304a;
+            --accent2: #ff6b35;
+            --accent-soft: rgba(232,48,74,0.12);
+            --green: #00e5a0;
+            --red: #ff4f6a;
+            --amber: #ffb547;
+            --blue: #60a5fa;
+            --text: #f0e8ea;
+            --muted: #7a6068;
+            --font-head: 'Rajdhani', sans-serif;
+            --font-mono: 'Share Tech Mono', monospace;
+            --font-body: 'Exo 2', sans-serif;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        body {
+            background:var(--bg); color:var(--text);
+            font-family:var(--font-body); min-height:100vh;
+            overflow-x:hidden; padding-bottom:40px;
+        }
+        canvas#bg-canvas { position:fixed; inset:0; z-index:0; opacity:0.35; pointer-events:none; }
+        .orb { position:fixed; border-radius:50%; filter:blur(120px); pointer-events:none; z-index:0; }
+        .orb-1 { width:500px; height:500px; background:var(--accent); opacity:0.06; top:-150px; right:-100px; }
+        .orb-2 { width:400px; height:400px; background:var(--accent2); opacity:0.04; bottom:0; left:-100px; }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            position:sticky; top:0; z-index:200;
+            background:rgba(10,6,8,0.92); backdrop-filter:blur(24px);
+            border-bottom:1px solid var(--border);
+            padding:0 16px; height:58px;
+            display:flex; align-items:center; justify-content:space-between; gap:12px;
+        }
+        .topbar-brand { display:flex; align-items:center; gap:10px; }
+        .brand-icon-sm {
+            width:36px; height:36px;
+            background:linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius:10px; display:flex; align-items:center; justify-content:center;
+            font-size:16px; color:white; flex-shrink:0;
+            box-shadow:0 0 18px rgba(232,48,74,0.4);
+            animation:pulse-logo 3s ease-in-out infinite;
+        }
+        @keyframes pulse-logo { 0%,100%{box-shadow:0 0 18px rgba(232,48,74,0.4);}50%{box-shadow:0 0 32px rgba(232,48,74,0.7);} }
+        .brand-name { font-family:var(--font-head); font-size:18px; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+        .brand-name span { color:var(--accent); }
+
+        .user-badge-pill {
+            display:inline-flex; align-items:center; gap:5px;
+            background:rgba(0,229,160,0.1); border:1px solid rgba(0,229,160,0.25);
+            border-radius:100px; padding:4px 12px;
+            font-family:var(--font-mono); font-size:10px;
+            color:var(--green); letter-spacing:1px;
+        }
+        .user-badge-dot { width:5px; height:5px; border-radius:50%; background:var(--green); box-shadow:0 0 5px var(--green); animation:blink 1.5s infinite; }
+        @keyframes blink { 0%,100%{opacity:1;}50%{opacity:0.2;} }
+
+        /* ── CONTENT ── */
+        .content { position:relative; z-index:10; padding:24px 16px 0; }
+
+        /* Timer hero */
+        .timer-hero {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:20px; padding:24px 20px;
+            position:relative; overflow:hidden; margin-bottom:14px;
+            box-shadow:0 12px 40px rgba(0,0,0,0.5);
+        }
+        .timer-hero::before {
+            content:''; position:absolute; top:0; left:0; right:0; height:2px;
+            background:linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+        }
+        .timer-bg-glow {
+            position:absolute; width:300px; height:300px; border-radius:50%;
+            background:radial-gradient(circle, rgba(232,48,74,0.08), transparent 70%);
+            top:-100px; right:-80px; pointer-events:none;
+        }
+        .timer-label {
+            font-family:var(--font-mono); font-size:10px; letter-spacing:3px;
+            text-transform:uppercase; color:var(--muted); margin-bottom:10px;
+            display:flex; align-items:center; gap:8px;
+        }
+        .timer-label::before { content:''; width:20px; height:1px; background:var(--border); }
+        .timer-value {
+            font-family:var(--font-mono); font-size:36px; font-weight:400;
+            color:var(--accent); text-shadow:0 0 20px rgba(232,48,74,0.4);
+            letter-spacing:2px; margin-bottom:6px;
+        }
+        .timer-sub { font-family:var(--font-mono); font-size:10px; color:var(--muted); letter-spacing:1px; }
+
+        /* Info card */
+        .info-card {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:20px; padding:18px 16px; margin-bottom:14px;
+            box-shadow:0 8px 32px rgba(0,0,0,0.4);
+        }
+        .info-card-title {
+            font-family:var(--font-mono); font-size:10px; letter-spacing:2px;
+            text-transform:uppercase; color:var(--muted); margin-bottom:14px;
+            display:flex; align-items:center; gap:8px;
+        }
+        .info-card-title i { color:var(--accent); }
+        .info-row {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:10px 0; border-bottom:1px solid var(--border);
+        }
+        .info-row:last-child { border-bottom:none; padding-bottom:0; }
+        .info-lbl { font-family:var(--font-mono); font-size:11px; color:var(--muted); }
+        .info-val { font-family:var(--font-mono); font-size:12px; color:var(--accent); word-break:break-all; text-align:right; max-width:65%; }
+
+        /* Stats */
+        .stats-row {
+            display:grid; grid-template-columns:repeat(3,1fr);
+            gap:10px; margin-bottom:20px;
+        }
+        .stat-card {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:16px; padding:16px 12px; text-align:center;
+            position:relative; overflow:hidden; transition:0.3s;
+            box-shadow:0 6px 24px rgba(0,0,0,0.4);
+        }
+        .stat-card::before {
+            content:''; position:absolute; top:0; left:0; right:0; height:2px;
+            background:linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity:0; transition:0.3s;
+        }
+        .stat-card:hover { transform:translateY(-2px); border-color:rgba(232,48,74,0.3); }
+        .stat-card:hover::before { opacity:1; }
+        .stat-val { font-family:var(--font-mono); font-size:26px; color:var(--accent); text-shadow:0 0 12px rgba(232,48,74,0.3); }
+        .stat-lbl { font-family:var(--font-mono); font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-top:4px; }
+
+        /* Section title */
+        .section-title {
+            font-family:var(--font-head); font-size:11px; letter-spacing:3px;
+            text-transform:uppercase; color:var(--muted);
+            margin-bottom:12px; display:flex; align-items:center; gap:12px;
+        }
+        .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+        /* Tabs */
+        .tabs { display:flex; gap:8px; margin-bottom:14px; }
+        .tab {
+            flex:1; padding:13px 10px; text-align:center; cursor:pointer;
+            background:rgba(255,255,255,0.03); border:1px solid var(--border);
+            border-radius:14px; font-family:var(--font-head); font-size:13px;
+            font-weight:600; letter-spacing:1px; color:var(--muted);
+            transition:0.25s; text-transform:uppercase;
+        }
+        .tab.active {
+            background:var(--accent-soft); border-color:rgba(232,48,74,0.35);
+            color:var(--accent);
+        }
+        .tab:hover:not(.active) { background:rgba(255,255,255,0.06); color:var(--text); }
+
+        /* Panel */
+        .panel { display:none; }
+        .panel.active { display:block; animation:fade-in 0.3s ease; }
+        @keyframes fade-in { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);} }
+
+        .panel-card {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:20px; padding:20px 16px; margin-bottom:14px;
+            box-shadow:0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        /* Form */
+        .form-group { margin-bottom:16px; }
+        label { display:block; font-family:var(--font-mono); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+        .input-wrap { position:relative; }
+        .input-icon { position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:13px; pointer-events:none; transition:0.2s; }
+        input[type=text], input[type=password], textarea {
+            width:100%; padding:13px 13px 13px 40px;
+            background:rgba(0,0,0,0.4); border:1px solid var(--border);
+            border-radius:12px; color:var(--text);
+            font-family:var(--font-body); font-size:14px;
+            transition:0.3s; outline:none; resize:vertical;
+        }
+        textarea { min-height:90px; font-family:var(--font-mono); font-size:12px; padding:12px; }
+        input:focus, textarea:focus { border-color:rgba(232,48,74,0.5); box-shadow:0 0 0 3px rgba(232,48,74,0.08); background:rgba(232,48,74,0.04); }
+        input:focus ~ .input-icon { color:var(--accent); }
+        input::placeholder, textarea::placeholder { color:var(--muted); }
+
+        /* Buttons */
+        .btn-primary {
+            width:100%; padding:15px;
+            background:linear-gradient(135deg, var(--accent), #c0203a);
+            color:white; border:none; border-radius:14px;
+            font-family:var(--font-head); font-size:15px; font-weight:700;
+            letter-spacing:2px; text-transform:uppercase; cursor:pointer;
+            transition:0.3s; position:relative; overflow:hidden;
+            box-shadow:0 6px 24px rgba(232,48,74,0.3);
+            display:flex; align-items:center; justify-content:center; gap:8px;
+        }
+        .btn-primary::before {
+            content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+            background:linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition:0.5s;
+        }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(232,48,74,0.45); }
+        .btn-primary:hover::before { left:100%; }
+        .btn-primary:active { transform:scale(0.98); }
+
+        .btn-secondary {
+            padding:12px 20px; background:rgba(255,255,255,0.04);
+            border:1px solid var(--border); color:var(--muted);
+            border-radius:14px; font-family:var(--font-head); font-size:13px;
+            font-weight:600; letter-spacing:1px; text-transform:uppercase;
+            cursor:pointer; transition:0.2s;
+            display:inline-flex; align-items:center; gap:8px;
+        }
+        .btn-secondary:hover { background:var(--accent-soft); border-color:rgba(232,48,74,0.3); color:var(--accent); }
+
+        /* Result box */
+        .result-box {
+            margin-top:14px; padding:14px; background:rgba(0,0,0,0.4);
+            border:1px solid var(--border); border-radius:12px; display:none;
+        }
+        .result-box.show { display:block; animation:fade-in 0.3s ease; }
+        .result-success { color:var(--green); font-family:var(--font-mono); font-size:12px; }
+        .result-error { color:var(--red); font-family:var(--font-mono); font-size:12px; }
+        .congrats-box {
+            background:linear-gradient(135deg, rgba(0,229,160,0.15), rgba(0,229,160,0.05));
+            border:1px solid rgba(0,229,160,0.3); border-radius:12px;
+            padding:16px; text-align:center;
+            font-family:var(--font-head); font-size:16px; font-weight:700;
+            color:var(--green); letter-spacing:1px;
+        }
+
+        /* JWT preview */
+        .jwt-preview {
+            background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.06);
+            padding:12px; border-radius:10px; font-family:var(--font-mono);
+            font-size:11px; word-break:break-all; margin-top:10px;
+            color:var(--muted); max-height:180px; overflow-y:auto; line-height:1.6;
+        }
+
+        /* Check panel */
+        .check-section { margin-top:4px; }
+        .check-panel { display:none; margin-top:14px; }
+
+        /* Action mini-btns */
+        .mini-btn {
+            display:inline-flex; align-items:center; gap:6px;
+            padding:7px 14px; border-radius:8px; font-family:var(--font-mono);
+            font-size:11px; cursor:pointer; transition:0.2s;
+        }
+        .mini-btn-green { background:rgba(0,229,160,0.1); border:1px solid rgba(0,229,160,0.25); color:var(--green); }
+        .mini-btn-red { background:rgba(255,79,106,0.1); border:1px solid rgba(255,79,106,0.25); color:var(--red); }
+        .mini-btn:hover { transform:translateY(-1px); filter:brightness(1.2); }
+
+        /* Toast */
+        #toast {
+            position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+            background:linear-gradient(135deg, var(--accent), #c0203a);
+            color:white; padding:12px 28px; border-radius:100px;
+            font-family:var(--font-head); font-size:14px; font-weight:600;
+            letter-spacing:0.5px; display:none; z-index:1000;
+            white-space:nowrap; box-shadow:0 8px 28px rgba(232,48,74,0.4);
+            animation:toast-in 0.3s ease;
+        }
+        #toast.error { background:linear-gradient(135deg,#555,#333); }
+        @keyframes toast-in { from{opacity:0;transform:translateX(-50%) translateY(10px);}to{opacity:1;transform:translateX(-50%) translateY(0);} }
+
+        @keyframes fade-up { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="topbar-brand">
+            <div class="brand-icon-sm"><i class="fa-solid fa-key"></i></div>
+            <div class="brand-name">UID <span>&</span> JWT</div>
+        </div>
+        <div class="user-badge-pill">
+            <span class="user-badge-dot"></span>
+            FREE USER
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- Timer Hero -->
+        <div class="timer-hero" style="animation:fade-up 0.6s ease;">
+            <div class="timer-bg-glow"></div>
+            <div class="timer-label"><i class="fa-solid fa-clock" style="color:var(--accent);"></i>Access Remaining</div>
+            <div class="timer-value" id="timer">Loading...</div>
+            <div class="timer-sub">// SESSION ACTIVE</div>
+        </div>
+
+        <!-- Device Info -->
+        <div class="info-card" style="animation:fade-up 0.65s ease;">
+            <div class="info-card-title"><i class="fa-solid fa-microchip"></i>Device Info</div>
+            <div class="info-row">
+                <span class="info-lbl">OID</span>
+                <span class="info-val" id="oid">{{OID}}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-lbl">Recent Access</span>
+                <span class="info-val">{{BROWSER}}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-lbl">Server IP</span>
+                <span class="info-val">65.108.39.249</span>
+            </div>
+            <div class="info-row">
+                <span class="info-lbl">Proxy Port</span>
+                <span class="info-val" style="color:var(--green);">20335</span>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row" style="animation:fade-up 0.7s ease;">
+            <div class="stat-card">
+                <div class="stat-val" id="totalUsers">0</div>
+                <div class="stat-lbl">Total UIDs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val">20335</div>
+                <div class="stat-lbl">Proxy Port</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val"><i class="fa-solid fa-circle" style="font-size:18px;color:var(--green);"></i></div>
+                <div class="stat-lbl">Status</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="section-title" style="animation:fade-up 0.72s ease;">Manage UIDs</div>
+        <div class="tabs" style="animation:fade-up 0.74s ease;">
+            <div class="tab active" id="tab-jwt" onclick="switchTab('jwt')">
+                <i class="fa-solid fa-key" style="margin-right:6px;"></i>Via JWT
+            </div>
+            <div class="tab" id="tab-token" onclick="switchTab('token')">
+                <i class="fa-solid fa-ticket" style="margin-right:6px;"></i>Via Token
+            </div>
+        </div>
+
+        <!-- JWT Panel -->
+        <div id="jwtPanel" class="panel active" style="animation:fade-up 0.76s ease;">
+            <div class="panel-card">
+                <div class="form-group">
+                    <label>UID</label>
+                    <div class="input-wrap">
+                        <input type="text" id="jwtUid" placeholder="Enter UID">
+                        <i class="fa-solid fa-fingerprint input-icon"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>JWT Token</label>
+                    <textarea id="jwtToken" placeholder="Paste JWT token here"></textarea>
+                </div>
+                <button onclick="saveViaJWT()" class="btn-primary">
+                    <i class="fa-solid fa-floppy-disk"></i> Save & Continue →
+                </button>
+                <div id="jwtCongrats" class="result-box"></div>
+            </div>
+        </div>
+
+        <!-- Token Panel -->
+        <div id="tokenPanel" class="panel" style="animation:fade-up 0.76s ease;">
+            <div class="panel-card">
+                <div class="form-group">
+                    <label>Access Token</label>
+                    <textarea id="accessToken" placeholder="Paste Access Token here" rows="3"></textarea>
+                </div>
+                <button onclick="convertAndSave()" class="btn-primary">
+                    <i class="fa-solid fa-rotate"></i> Convert & Save →
+                </button>
+                <div id="tokenCongrats" class="result-box"></div>
+            </div>
+        </div>
+
+        <!-- Check UID -->
+        <div class="section-title" style="animation:fade-up 0.78s ease;">Check UID</div>
+        <div class="check-section" style="animation:fade-up 0.8s ease;">
+            <button class="btn-secondary" onclick="showCheckUI()" style="width:100%;justify-content:center;">
+                <i class="fa-solid fa-magnifying-glass"></i> Check UID Status
+            </button>
+            <div id="checkPanel" class="check-panel">
+                <div class="panel-card">
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <div class="input-wrap">
+                            <input type="text" id="checkUidInput" placeholder="Enter UID to check">
+                            <i class="fa-solid fa-search input-icon"></i>
+                        </div>
+                    </div>
+                    <button onclick="checkUID()" class="btn-secondary" style="width:100%;justify-content:center;">
+                        <i class="fa-solid fa-search"></i> Check UID
+                    </button>
+                    <div id="checkResult" class="result-box"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        window.remainingTime = '{{REMAINING_TIME}}';
+        window.authToken = '{{TOKEN}}';
+    </script>
+    <script src="/static/js/main.js"></script>
+    <script>
+    // Override congrats/result rendering to match new design
+    function showCongrats(divId, uid) {
+        const div = document.getElementById(divId);
+        div.innerHTML = `<div class="congrats-box">🎉 UID ${uid || ''} saved successfully!</div>`;
+        div.classList.add('show');
+        setTimeout(() => div.classList.remove('show'), 5000);
+    }
+
+    // Particle canvas
+    (function() {
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        const CHARS = ['01','10','0x','FF','>>','<<','{}','//','&&','||','!=','=='];
+        const SYMBOLS = ['◈','◉','◎','▸','⬡','⊕','⊗','⌬','⎔'];
+        let W, H, particles = [];
+        function resize() { W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+        resize(); window.addEventListener('resize', resize);
+        function mkP() {
+            const isS=Math.random()>0.5, pool=isS?SYMBOLS:CHARS;
+            return { x:Math.random()*W, y:Math.random()*H, char:pool[Math.floor(Math.random()*pool.length)],
+                size:Math.random()*8+6, color:Math.random()<0.5?'#e8304a':Math.random()<0.6?'rgba(232,48,74,0.5)':'rgba(255,255,255,0.1)',
+                alpha:Math.random()*0.5+0.1, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5,
+                pulse:Math.random()*Math.PI*2, ps:Math.random()*0.03+0.01, ct:Math.random()*120, isS, pool };
+        }
+        for(let i=0;i<70;i++) particles.push(mkP());
+        function draw() {
+            ctx.clearRect(0,0,W,H);
+            particles.forEach(p => {
+                p.pulse+=p.ps; p.ct--;
+                if(p.ct<=0){p.char=p.pool[Math.floor(Math.random()*p.pool.length)];p.ct=Math.random()*100+40;}
+                p.x+=p.vx; p.y+=p.vy;
+                if(p.x<-20)p.x=W+10; if(p.x>W+20)p.x=-10;
+                if(p.y<-20)p.y=H+10; if(p.y>H+20)p.y=-10;
+                ctx.save(); ctx.globalAlpha=p.alpha*(0.6+0.4*Math.sin(p.pulse));
+                ctx.font=`${p.isS?'':'bold '}${p.size}px 'Share Tech Mono',monospace`;
+                ctx.fillStyle=p.color; ctx.fillText(p.char,p.x,p.y); ctx.restore();
+            });
+            requestAnimationFrame(draw);
+        }
+        draw();
+    })();
+
+    function switchTab(tab) {
+        ['jwt','token'].forEach(t => {
+            document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+            document.getElementById(t+'Panel').classList.toggle('active', t===tab);
+        });
+    }
+
+    function showCheckUI() {
+        const p = document.getElementById('checkPanel');
+        p.style.display = p.style.display === 'none' || p.style.display === '' ? 'block' : 'none';
+    }
+    </script>
+</body>
+</html>
