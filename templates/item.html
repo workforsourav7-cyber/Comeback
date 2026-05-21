@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item.name }} - AccountStore</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <i class="fas fa-store"></i>
+                <span>AccountStore</span>
+            </a>
+            <a href="/" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Store
+            </a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="item-detail">
+            <!-- Item Image -->
+            <div class="detail-image">
+                <img src="{{ item.image }}" alt="{{ item.name }}">
+            </div>
+            
+            <!-- Item Info -->
+            <div class="detail-info">
+                <div class="detail-header">
+                    <h1>{{ item.name }}</h1>
+                    <div class="price-tag">${{ "%.2f"|format(item.price) }}</div>
+                </div>
+                
+                <div class="detail-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-hashtag"></i>
+                        <span>Item ID: <strong>{{ item.id }}</strong></span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-globe"></i>
+                        <span>Region: <strong>{{ item.region }}</strong></span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-check-circle" style="color: #4CAF50;"></i>
+                        <span>Available: 
+                            <strong class="online-dot">{{ online_count }}</strong> online
+                        </span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-times-circle" style="color: #f44336;"></i>
+                        <span>Sold: 
+                            <strong class="offline-dot">{{ offline_count }}</strong> offline
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                <div class="description">
+                    <h3><i class="fas fa-info-circle"></i> Description</h3>
+                    <p>{{ item.description }}</p>
+                </div>
+                
+                <!-- Buy Now Section -->
+                <div class="buy-section">
+                    <div class="stock-info">
+                        <div class="stock-indicator">
+                            <span class="online-indicator">
+                                <i class="fas fa-circle"></i> {{ online_count }} Available
+                            </span>
+                            <span class="offline-indicator">
+                                <i class="fas fa-circle"></i> {{ offline_count }} Sold
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <button class="buy-now-btn" onclick="showRedeemModal()">
+                        <i class="fas fa-shopping-cart"></i> BUY NOW
+                    </button>
+                    
+                    <div class="payment-methods">
+                        <p><i class="fas fa-shield-alt"></i> Secure Payment</p>
+                        <p><i class="fas fa-bolt"></i> Instant Delivery</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Redeem Modal -->
+    <div id="redeemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-gift"></i> Redeem Offer</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="spin-wheel">
+                    <div class="wheel" id="wheel">
+                        <div class="wheel-item">$1</div>
+                        <div class="wheel-item">$2</div>
+                        <div class="wheel-item">$5</div>
+                        <div class="wheel-item">$10</div>
+                        <div class="wheel-item">$20</div>
+                        <div class="wheel-item">$50</div>
+                    </div>
+                    <button class="spin-btn" onclick="spinWheel()">
+                        <i class="fas fa-play"></i> SPIN TO WIN
+                    </button>
+                </div>
+                
+                <div class="redeem-input">
+                    <h3>Or Enter Redeem Code</h3>
+                    <div class="input-group">
+                        <input type="text" id="redeemCode" placeholder="Enter redeem code (e.g., nexi-iot@pay:99991)">
+                        <button onclick="applyRedeem()">
+                            <i class="fas fa-check"></i> Apply
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="payment-proceed" id="paymentSection" style="display: none;">
+                    <h3>Proceed to Payment</h3>
+                    <p>Final Amount: $<span id="finalAmount">{{ "%.2f"|format(item.price) }}</span></p>
+                    <button class="proceed-btn" onclick="processPayment()">
+                        <i class="fas fa-lock"></i> Complete Purchase
+                    </button>
+                </div>
+                
+                <div id="paymentResult" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        const itemId = "{{ item.id }}";
+        const itemPrice = {{ item.price }};
+        
+        function showRedeemModal() {
+            document.getElementById('redeemModal').style.display = 'block';
+        }
+        
+        function closeModal() {
+            document.getElementById('redeemModal').style.display = 'none';
+        }
+        
+        function spinWheel() {
+            const wheel = document.getElementById('wheel');
+            const result = Math.floor(Math.random() * 6);
+            const rotation = 1080 + (result * 60); // 60 degrees per item
+            
+            wheel.style.transition = 'transform 3s cubic-bezier(0.2, 0.8, 0.3, 1)';
+            wheel.style.transform = `rotate(${rotation}deg)`;
+            
+            setTimeout(() => {
+                const discount = [1, 2, 5, 10, 20, 50][result];
+                applyDiscount(discount);
+            }, 3000);
+        }
+        
+        function applyDiscount(discount) {
+            const finalAmount = Math.max(0, itemPrice - discount);
+            document.getElementById('finalAmount').textContent = finalAmount.toFixed(2);
+            document.getElementById('paymentSection').style.display = 'block';
+        }
+        
+        function applyRedeem() {
+            const code = document.getElementById('redeemCode').value.trim();
+            
+            fetch('/redeem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code: code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Redeem successful! Discount: $${data.amount}`);
+                    applyDiscount(data.amount);
+                } else {
+                    alert('Invalid or used redeem code');
+                }
+            });
+        }
+        
+        function processPayment() {
+            fetch(`/buy/${itemId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('paymentResult').innerHTML = `
+                        <div class="success-result">
+                            <div class="result-header">
+                                <i class="fas fa-check-circle"></i>
+                                <h2>Payment Successful!</h2>
+                            </div>
+                            <div class="account-details">
+                                <h3>Account Details:</h3>
+                                <div class="detail-box">
+                                    <div class="detail-row">
+                                        <span>Item:</span>
+                                        <strong>${data.item_name}</strong>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span>UID:</span>
+                                        <code>${data.uid}</code>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span>Password:</span>
+                                        <code>${data.password}</code>
+                                    </div>
+                                </div>
+                                <button class="copy-btn" onclick="copyDetails()">
+                                    <i class="fas fa-copy"></i> Copy All
+                                </button>
+                            </div>
+                            <button onclick="window.location.href='/'">
+                                <i class="fas fa-home"></i> Back to Store
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById('paymentResult').style.display = 'block';
+                } else {
+                    alert('Payment failed: ' + data.error);
+                }
+            });
+        }
+        
+        function copyDetails() {
+            // کاپی کا logic
+            alert('Details copied to clipboard!');
+        }
+        
+        // Modal کو باہر کلک کرنے پر بند کرنا
+        window.onclick = function(event) {
+            const modal = document.getElementById('redeemModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
