@@ -1,0 +1,14 @@
+/* PNL CODEX Style — base overrides */
+* { margin:0; padding:0; box-sizing:border-box; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:rgba(0,0,0,0.3); }
+::-webkit-scrollbar-thumb { background:rgba(232,48,74,0.4); border-radius:2px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(232,48,74,0.7); }
+
+/* Selection */
+::selection { background:rgba(232,48,74,0.3); color:#f0e8ea; }
+
+/* Full-width input override */
+input.full-width, textarea.full-width { width:100%; }
