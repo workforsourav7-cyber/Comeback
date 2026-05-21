@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Login — UID/JWT Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0a0608;
+            --surface: #120a0c;
+            --card: #1a0e10;
+            --border: rgba(232,48,74,0.15);
+            --accent: #e8304a;
+            --accent2: #ff6b35;
+            --accent-soft: rgba(232,48,74,0.12);
+            --green: #00e5a0;
+            --text: #f0e8ea;
+            --muted: #7a6068;
+            --font-head: 'Rajdhani', sans-serif;
+            --font-mono: 'Share Tech Mono', monospace;
+            --font-body: 'Exo 2', sans-serif;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        canvas#bg-canvas { position:fixed; inset:0; z-index:0; opacity:0.45; pointer-events:none; }
+        .orb { position:fixed; border-radius:50%; filter:blur(120px); pointer-events:none; z-index:0; }
+        .orb-1 { width:500px; height:500px; background:var(--accent); opacity:0.06; top:-150px; right:-100px; }
+        .orb-2 { width:400px; height:400px; background:var(--accent2); opacity:0.04; bottom:0; left:-100px; }
+
+        .container { position:relative; z-index:10; width:100%; max-width:420px; }
+
+        .brand-top { text-align:center; margin-bottom:28px; animation: fade-up 0.6s ease; }
+        .brand-icon {
+            width:60px; height:60px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius:18px;
+            display:inline-flex; align-items:center; justify-content:center;
+            font-size:26px; color:white;
+            box-shadow: 0 0 28px rgba(232,48,74,0.5);
+            animation: pulse-logo 3s ease-in-out infinite;
+            margin-bottom:14px;
+        }
+        @keyframes pulse-logo {
+            0%,100% { box-shadow:0 0 24px rgba(232,48,74,0.5); }
+            50% { box-shadow:0 0 44px rgba(232,48,74,0.8); }
+        }
+        .brand-name { font-family:var(--font-head); font-size:26px; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:#fff; }
+        .brand-name span { color:var(--accent); }
+        .brand-sub { font-family:var(--font-mono); font-size:11px; color:var(--muted); letter-spacing:2px; margin-top:4px; }
+
+        .login-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius:24px;
+            padding:32px 24px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+            position:relative; overflow:hidden;
+            animation: fade-up 0.7s ease;
+        }
+        .login-card::before {
+            content:'';
+            position:absolute; top:0; left:0; right:0; height:2px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+        }
+
+        .status-pill {
+            display:inline-flex; align-items:center; gap:8px;
+            background: var(--accent-soft);
+            border:1px solid rgba(232,48,74,0.3);
+            border-radius:100px; padding:6px 16px;
+            font-family:var(--font-mono); font-size:11px;
+            color:var(--accent); letter-spacing:1px; margin-bottom:24px;
+        }
+        .status-dot {
+            width:6px; height:6px; border-radius:50%;
+            background:var(--accent); box-shadow:0 0 6px var(--accent);
+            animation:blink 1.5s infinite;
+        }
+        @keyframes blink { 0%,100% {opacity:1;} 50% {opacity:0.2;} }
+
+        .card-title { font-family:var(--font-head); font-size:24px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; }
+        .card-sub { font-size:13px; color:var(--muted); margin-bottom:28px; font-family:var(--font-mono); }
+
+        .form-group { margin-bottom:18px; }
+        label { display:block; font-family:var(--font-mono); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+
+        .input-wrap { position:relative; }
+        .input-icon {
+            position:absolute; left:14px; top:50%; transform:translateY(-50%);
+            color:var(--muted); font-size:14px; pointer-events:none; transition:0.2s;
+        }
+        input {
+            width:100%; padding:14px 14px 14px 44px;
+            background: rgba(0,0,0,0.4);
+            border:1px solid var(--border);
+            border-radius:14px; color:var(--text);
+            font-family:var(--font-body); font-size:14px;
+            transition:0.3s; outline:none;
+        }
+        input:focus { border-color:rgba(232,48,74,0.5); box-shadow:0 0 0 3px rgba(232,48,74,0.08); background:rgba(232,48,74,0.04); }
+        input:focus ~ .input-icon { color:var(--accent); }
+        input::placeholder { color:var(--muted); }
+
+        .btn-login {
+            width:100%; padding:16px;
+            background: linear-gradient(135deg, var(--accent), #c0203a);
+            color:white; border:none; border-radius:14px;
+            font-family:var(--font-head); font-size:16px; font-weight:700;
+            letter-spacing:3px; text-transform:uppercase;
+            cursor:pointer; transition:0.3s;
+            position:relative; overflow:hidden;
+            box-shadow:0 6px 24px rgba(232,48,74,0.35);
+            display:flex; align-items:center; justify-content:center; gap:10px;
+            margin-top:8px;
+        }
+        .btn-login::before {
+            content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+            background:linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition:0.5s;
+        }
+        .btn-login:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(232,48,74,0.5); }
+        .btn-login:hover::before { left:100%; }
+        .btn-login:active { transform:scale(0.98); }
+
+        .btn-text { transition:opacity 0.2s; }
+        .spinner,.cross-icon,.check-icon { display:none; }
+        .spinner { width:20px; height:20px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .btn-login.loading .btn-text { opacity:0; }
+        .btn-login.loading .spinner { display:block; position:absolute; }
+        .btn-login.cross .btn-text { opacity:0; }
+        .btn-login.cross .cross-icon { display:block; }
+        .btn-login.check .btn-text { opacity:0; }
+        .btn-login.check .check-icon { display:block; }
+
+        .info-row {
+            display:flex; align-items:center; justify-content:center; gap:8px;
+            margin-top:20px; font-family:var(--font-mono); font-size:11px; color:var(--muted);
+        }
+        .info-row strong { color:var(--accent); }
+
+        #toast {
+            position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+            background:linear-gradient(135deg, var(--accent), #c0203a);
+            color:white; padding:12px 28px; border-radius:100px;
+            font-family:var(--font-head); font-size:14px; font-weight:600;
+            letter-spacing:0.5px; display:none; z-index:1000;
+            white-space:nowrap; box-shadow:0 8px 28px rgba(232,48,74,0.4);
+            animation:toast-in 0.3s ease;
+        }
+        #toast.error { background:linear-gradient(135deg,#555,#333); }
+        @keyframes toast-in { from { opacity:0; transform:translateX(-50%) translateY(10px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+
+        @keyframes fade-up { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        <div class="brand-top">
+            <div class="brand-icon"><i class="fa-solid fa-key"></i></div>
+            <div class="brand-name">UID <span>&</span> JWT</div>
+            <div class="brand-sub">// SECURE PROXY AUTHENTICATION</div>
+        </div>
+
+        <div class="login-card">
+            <div class="status-pill">
+                <span class="status-dot"></span>
+                AUTHENTICATION REQUIRED
+            </div>
+            <div class="card-title">🔐 Login</div>
+            <div class="card-sub">Enter credentials to access panel</div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Access Token</label>
+                    <div class="input-wrap">
+                        <input type="text" id="token" placeholder="Enter your access token" required autocomplete="off">
+                        <i class="fa-solid fa-ticket input-icon"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-wrap">
+                        <input type="password" id="password" placeholder="Enter password" required>
+                        <i class="fa-solid fa-lock input-icon"></i>
+                    </div>
+                </div>
+                <button type="submit" class="btn-login" id="loginBtn">
+                    <span class="btn-text"><i class="fa-solid fa-arrow-right-to-bracket" style="margin-right:8px;"></i>LOGIN</span>
+                    <div class="spinner"></div>
+                    <svg class="cross-icon" viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    <svg class="check-icon" viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                </button>
+            </form>
+
+            <div class="info-row">
+                <i class="fa-solid fa-circle-info"></i>
+                Default password: <strong>test</strong>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+    <script src="/static/js/main.js"></script>
+    <script>
+    (function() {
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        const CHARS = ['01','10','0x','FF','>>','<<','{}','//','&&','||','!=','=='];
+        const SYMBOLS = ['◈','◉','◎','▸','⬡','⊕','⊗','⌬','⎔'];
+        let W, H, particles = [];
+        function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+        resize(); window.addEventListener('resize', resize);
+        function mkP() {
+            const isS = Math.random() > 0.5, pool = isS ? SYMBOLS : CHARS;
+            return { x:Math.random()*W, y:Math.random()*H, char:pool[Math.floor(Math.random()*pool.length)],
+                size:Math.random()*8+6, color:Math.random()<0.5?'#e8304a':Math.random()<0.6?'rgba(232,48,74,0.5)':'rgba(255,255,255,0.1)',
+                alpha:Math.random()*0.5+0.1, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5,
+                pulse:Math.random()*Math.PI*2, ps:Math.random()*0.03+0.01, ct:Math.random()*120, isS, pool };
+        }
+        for (let i=0;i<70;i++) particles.push(mkP());
+        function draw() {
+            ctx.clearRect(0,0,W,H);
+            particles.forEach(p => {
+                p.pulse+=p.ps; p.ct--;
+                if(p.ct<=0){p.char=p.pool[Math.floor(Math.random()*p.pool.length)];p.ct=Math.random()*100+40;}
+                p.x+=p.vx; p.y+=p.vy;
+                if(p.x<-20)p.x=W+10; if(p.x>W+20)p.x=-10;
+                if(p.y<-20)p.y=H+10; if(p.y>H+20)p.y=-10;
+                ctx.save(); ctx.globalAlpha=p.alpha*(0.6+0.4*Math.sin(p.pulse));
+                ctx.font=`${p.isS?'':'bold '}${p.size}px 'Share Tech Mono',monospace`;
+                ctx.fillStyle=p.color; ctx.fillText(p.char,p.x,p.y); ctx.restore();
+            });
+            requestAnimationFrame(draw);
+        }
+        draw();
+    })();
+    </script>
+</body>
+</html>
