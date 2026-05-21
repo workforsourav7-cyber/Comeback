@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AccountHub - Premium Accounts Marketplace</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Top Announcement Bar -->
+    <div class="announcement-bar">
+        <div class="container">
+            <p><i class="fas fa-shipping-fast"></i> Instant Delivery • <i class="fas fa-shield-alt"></i> 100% Verified Accounts • <i class="fas fa-headset"></i> 24/7 Support</p>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo-area">
+                    <a href="/" class="logo">
+                        <i class="fas fa-cube"></i>
+                        <span>Account<span class="logo-highlight">Hub</span></span>
+                    </a>
+                    <div class="location-selector">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Deliver to <strong>Pakistan</strong></span>
+                    </div>
+                </div>
+
+                <div class="search-area">
+                    <form action="/search" method="get" class="search-form">
+                        <select class="search-category">
+                            <option>All Categories</option>
+                            <option>Streaming</option>
+                            <option>Gaming</option>
+                            <option>Software</option>
+                            <option>VPN</option>
+                            <option>Education</option>
+                        </select>
+                        <input type="text" name="q" placeholder="Search for accounts, games, software..." 
+                               value="{{ search_query if search_query else '' }}" 
+                               class="search-input">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="user-actions">
+                    <a href="#" class="action-btn">
+                        <i class="fas fa-globe"></i>
+                        <span>EN</span>
+                    </a>
+                    <a href="#" class="action-btn">
+                        <i class="fas fa-user"></i>
+                        <span>Account</span>
+                    </a>
+                    <a href="#" class="action-btn">
+                        <i class="fas fa-return"></i>
+                        <span>Orders</span>
+                    </a>
+                    <a href="#" class="action-btn cart-btn">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count">0</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="main-nav">
+                <a href="#" class="nav-all">
+                    <i class="fas fa-bars"></i>
+                    All
+                </a>
+                <a href="/category/streaming">Streaming</a>
+                <a href="/category/gaming">Gaming</a>
+                <a href="/category/software">Software</a>
+                <a href="/category/vpn">VPN Services</a>
+                <a href="/category/education">Education</a>
+                <a href="/category/music">Music</a>
+                <a href="/category/social">Social Media</a>
+                <a href="#" class="nav-deal">
+                    <i class="fas fa-bolt"></i>
+                    Today's Deals
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Carousel -->
+    <section class="hero-carousel">
+        <div class="container">
+            <div class="carousel-container">
+                <div class="carousel-slides">
+                    <div class="slide active" style="background: linear-gradient(to right, #232f3e, #37475a);">
+                        <div class="slide-content">
+                            <h1>Premium Accounts Marketplace</h1>
+                            <p>Get verified accounts for all your favorite services</p>
+                            <a href="#featured" class="cta-btn">Shop Now <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                    <div class="slide" style="background: linear-gradient(to right, #146eb4, #0f5296);">
+                        <div class="slide-content">
+                            <h1>Instant Delivery Guaranteed</h1>
+                            <p>Receive your credentials immediately after purchase</p>
+                            <a href="/category/streaming" class="cta-btn">Browse Streaming <i class="fas fa-play-circle"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-dots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Categories -->
+    <section class="featured-categories">
+        <div class="container">
+            <div class="section-header">
+                <h2>Shop by Category</h2>
+                <a href="#" class="see-all">See all <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="categories-grid">
+                <a href="/category/streaming" class="category-card">
+                    <div class="category-icon" style="background: #e50914;">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                    <span>Streaming</span>
+                </a>
+                <a href="/category/gaming" class="category-card">
+                    <div class="category-icon" style="background: #107c10;">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <span>Gaming</span>
+                </a>
+                <a href="/category/software" class="category-card">
+                    <div class="category-icon" style="background: #0078d4;">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <span>Software</span>
+                </a>
+                <a href="/category/vpn" class="category-card">
+                    <div class="category-icon" style="background: #00a4ff;">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <span>VPN</span>
+                </a>
+                <a href="/category/music" class="category-card">
+                    <div class="category-icon" style="background: #1db954;">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <span>Music</span>
+                </a>
+                <a href="/category/education" class="category-card">
+                    <div class="category-icon" style="background: #ff6b00;">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <span>Education</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Items -->
+    <section class="featured-items" id="featured">
+        <div class="container">
+            <div class="section-header">
+                <h2>Featured Products</h2>
+                <a href="#" class="see-all">View all <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="products-grid">
+                {% for item in featured_items %}
+                <div class="product-card">
+                    <a href="/item/{{ item.id }}" class="product-link">
+                        <div class="product-image">
+                            <img src="{{ item.image }}" alt="{{ item.name }}" onerror="this.src='/static/images/default-item.png'">
+                            <div class="product-badge">
+                                <span class="badge-featured">FEATURED</span>
+                            </div>
+                            <button class="wishlist-btn">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">{{ item.name }}</h3>
+                            <div class="product-rating">
+                                <div class="stars">
+                                    {% for i in range(5) %}
+                                    <i class="fas fa-star{% if i < item.rating|int %} filled{% endif %}"></i>
+                                    {% endfor %}
+                                </div>
+                                <span class="rating-count">({{ item.reviews }})</span>
+                            </div>
+                            <div class="product-price">
+                                <span class="current-price">${{ "%.2f"|format(item.price) }}</span>
+                                {% if item.original_price and item.original_price > item.price %}
+                                <span class="original-price">${{ "%.2f"|format(item.original_price) }}</span>
+                                <span class="discount-percent">{{ ((item.original_price - item.price)/item.original_price*100)|int }}% off</span>
+                                {% endif %}
+                            </div>
+                            <div class="product-meta">
+                                <span><i class="fas fa-tag"></i> {{ item.category|title }}</span>
+                                <span><i class="fas fa-globe"></i> {{ item.region }}</span>
+                            </div>
+                            <div class="product-stock">
+                                <i class="fas fa-check-circle"></i>
+                                <span>{{ item.stock }} in stock</span>
+                            </div>
+                        </div>
+                    </a>
+                    <button class="add-to-cart-btn" data-item-id="{{ item.id }}">
+                        <i class="fas fa-cart-plus"></i> Add to Cart
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Trending Now -->
+    <section class="trending-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Trending Now 🔥</h2>
+                <a href="#" class="see-all">See more trends <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="products-grid">
+                {% for item in trending_items %}
+                <div class="product-card trending-card">
+                    <div class="trending-badge">
+                        <i class="fas fa-fire"></i> TRENDING
+                    </div>
+                    <a href="/item/{{ item.id }}" class="product-link">
+                        <div class="product-image">
+                            <img src="{{ item.image }}" alt="{{ item.name }}" onerror="this.src='/static/images/default-item.png'">
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">{{ item.name }}</h3>
+                            <div class="product-price">
+                                <span class="current-price">${{ "%.2f"|format(item.price) }}</span>
+                            </div>
+                            <button class="buy-now-btn" data-item-id="{{ item.id }}">
+                                Buy Now
+                            </button>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- All Products -->
+    <section class="all-products">
+        <div class="container">
+            <div class="section-header">
+                <h2>All Available Accounts</h2>
+                <div class="sort-options">
+                    <span>Sort by:</span>
+                    <select class="sort-select">
+                        <option>Featured</option>
+                        <option>Price: Low to High</option>
+                        <option>Price: High to Low</option>
+                        <option>Most Popular</option>
+                        <option>Newest Arrivals</option>
+                    </select>
+                </div>
+            </div>
+            
+            {% if items %}
+            <div class="products-grid four-columns">
+                {% for item in items %}
+                <div class="product-card">
+                    <a href="/item/{{ item.id }}" class="product-link">
+                        <div class="product-image">
+                            <img src="{{ item.image }}" alt="{{ item.name }}" onerror="this.src='/static/images/default-item.png'">
+                            {% if item.original_price and item.original_price > item.price %}
+                            <div class="discount-badge">
+                                -{{ ((item.original_price - item.price)/item.original_price*100)|int }}%
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">{{ item.name }}</h3>
+                            <div class="product-rating">
+                                <div class="stars">
+                                    {% for i in range(5) %}
+                                    <i class="fas fa-star{% if i < item.rating|int %} filled{% endif %}"></i>
+                                    {% endfor %}
+                                </div>
+                                <span class="rating-count">({{ item.reviews }})</span>
+                            </div>
+                            <div class="product-price">
+                                <span class="current-price">${{ "%.2f"|format(item.price) }}</span>
+                                {% if item.original_price and item.original_price > item.price %}
+                                <span class="original-price">${{ "%.2f"|format(item.original_price) }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="product-features">
+                                <ul>
+                                    {% for feature in item.features[:2] %}
+                                    <li><i class="fas fa-check"></i> {{ feature }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="product-stock">
+                                {% if item.stock > 0 %}
+                                <span class="in-stock"><i class="fas fa-check-circle"></i> In Stock</span>
+                                {% else %}
+                                <span class="out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                    <div class="product-actions">
+                        <button class="add-to-cart-btn" data-item-id="{{ item.id }}">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                        <button class="buy-now-btn" data-item-id="{{ item.id }}">
+                            Buy Now
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h3>No products found</h3>
+                <p>Try adjusting your search or filter to find what you're looking for.</p>
+                <a href="/" class="cta-btn">View All Products</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Trust Signals -->
+    <section class="trust-signals">
+        <div class="container">
+            <div class="trust-grid">
+                <div class="trust-item">
+                    <i class="fas fa-shipping-fast"></i>
+                    <h3>Instant Delivery</h3>
+                    <p>Get credentials immediately after payment</p>
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>100% Verified</h3>
+                    <p>All accounts tested and working</p>
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-headset"></i>
+                    <h3>24/7 Support</h3>
+                    <p>Round-the-clock customer support</p>
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-undo"></i>
+                    <h3>Refund Policy</h3>
+                    <p>30-day money back guarantee</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-top">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-col">
+                        <h3>Get to Know Us</h3>
+                        <a href="/about">About Us</a>
+                        <a href="#">Careers</a>
+                        <a href="#">Press Releases</a>
+                        <a href="#">AccountHub Science</a>
+                    </div>
+                    <div class="footer-col">
+                        <h3>Make Money with Us</h3>
+                        <a href="#">Sell on AccountHub</a>
+                        <a href="#">Become an Affiliate</a>
+                        <a href="#">Advertise Your Products</a>
+                    </div>
+                    <div class="footer-col">
+                        <h3>Payment Products</h3>
+                        <a href="#">Business Card</a>
+                        <a href="#">Shop with Points</a>
+                        <a href="#">Reload Your Balance</a>
+                    </div>
+                    <div class="footer-col">
+                        <h3>Let Us Help You</h3>
+                        <a href="#">Your Account</a>
+                        <a href="#">Your Orders</a>
+                        <a href="/faq">FAQ</a>
+                        <a href="/contact">Contact Us</a>
+                    </div>
+                    <div class="footer-col newsletter">
+                        <h3>Stay Updated</h3>
+                        <p>Subscribe to our newsletter for the latest deals</p>
+                        <div class="newsletter-form">
+                            <input type="email" placeholder="Your email address">
+                            <button type="submit">Subscribe</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="footer-bottom-content">
+                    <div class="footer-logo">
+                        <i class="fas fa-cube"></i>
+                        <span>Account<span class="logo-highlight">Hub</span></span>
+                    </div>
+                    <div class="footer-links">
+                        <a href="#">Conditions of Use</a>
+                        <a href="#">Privacy Notice</a>
+                        <a href="#">Your Ads Privacy Choices</a>
+                    </div>
+                    <div class="copyright">
+                        <p>&copy; 2024 AccountHub.com, Inc. or its affiliates</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Quick Cart Modal -->
+    <div id="quickCart" class="modal">
+        <div class="modal-content cart-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="cart-empty">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>Your cart is empty</p>
+                    <a href="/" class="cta-btn">Continue Shopping</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buy Now Modal -->
+    <div id="buyNowModal" class="modal">
+        <div class="modal-content buy-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-shopping-bag"></i> Complete Purchase</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="buy-form">
+                    <div class="item-summary">
+                        <div class="item-image">
+                            <img id="buyItemImage" src="" alt="">
+                        </div>
+                        <div class="item-details">
+                            <h4 id="buyItemName"></h4>
+                            <div class="item-price">
+                                <span class="price" id="buyItemPrice"></span>
+                                <span class="stock" id="buyItemStock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="redeem-section">
+                        <h4><i class="fas fa-ticket-alt"></i> Have a promo code?</h4>
+                        <div class="redeem-input-group">
+                            <input type="text" id="redeemCodeInput" placeholder="Enter promo code">
+                            <button type="button" id="applyRedeemBtn">Apply</button>
+                        </div>
+                        <div id="redeemMessage"></div>
+                    </div>
+                    
+                    <div class="price-summary">
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span id="subtotalPrice">$0.00</span>
+                        </div>
+                        <div class="summary-row discount-row">
+                            <span>Discount:</span>
+                            <span id="discountAmount">-$0.00</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total:</span>
+                            <span id="totalPrice">$0.00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-section">
+                        <h4><i class="fas fa-credit-card"></i> Payment Method</h4>
+                        <div class="payment-options">
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="stripe" checked>
+                                <i class="fab fa-cc-stripe"></i> Credit/Debit Card
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="paypal">
+                                <i class="fab fa-paypal"></i> PayPal
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="crypto">
+                                <i class="fab fa-bitcoin"></i> Cryptocurrency
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button class="confirm-purchase-btn" id="confirmPurchaseBtn">
+                        <i class="fas fa-lock"></i> Complete Purchase
+                    </button>
+                    
+                    <p class="secure-note">
+                        <i class="fas fa-shield-alt"></i> Your payment is secure and encrypted
+                    </p>
+                </div>
+                
+                <div id="purchaseResult" class="purchase-result" style="display: none;">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Purchase Successful!</h3>
+                    <p>Your account details have been generated.</p>
+                    
+                    <div class="account-details-box">
+                        <h4><i class="fas fa-key"></i> Account Credentials</h4>
+                        <div class="credential-row">
+                            <span>Username/Email:</span>
+                            <code id="resultUID"></code>
+                            <button class="copy-btn" data-clipboard-target="#resultUID">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="credential-row">
+                            <span>Password:</span>
+                            <code id="resultPassword"></code>
+                            <button class="copy-btn" data-clipboard-target="#resultPassword">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="credential-row">
+                            <span>Order ID:</span>
+                            <code id="resultOrderId"></code>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn-secondary" onclick="printCredentials()">
+                            <i class="fas fa-print"></i> Print Receipt
+                        </button>
+                        <button class="btn-primary" onclick="window.location.href='/'">
+                            <i class="fas fa-shopping-bag"></i> Continue Shopping
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Carousel functionality
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-slides .slide');
+        const dots = document.querySelectorAll('.carousel-dots .dot');
+        
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            slides[index].classList.add('active');
+            dots[index].classList.add('active');
+            currentSlide = index;
+        }
+        
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        }
+        
+        // Auto slide every 5 seconds
+        setInterval(nextSlide, 5000);
+        
+        // Initialize first slide
+        showSlide(0);
+        
+        // Add click handlers to dots
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => showSlide(index));
+        });
+        
+        // Buy Now functionality
+        document.querySelectorAll('.buy-now-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const itemId = this.getAttribute('data-item-id');
+                openBuyModal(itemId);
+            });
+        });
+        
+        // Add to Cart functionality
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const itemId = this.getAttribute('data-item-id');
+                addToCart(itemId);
+            });
+        });
+        
+        async function openBuyModal(itemId) {
+            try {
+                const response = await fetch(`/api/item/${itemId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const item = data.item;
+                    
+                    // Update modal with item data
+                    document.getElementById('buyItemImage').src = item.image;
+                    document.getElementById('buyItemName').textContent = item.name;
+                    document.getElementById('buyItemPrice').textContent = `$${item.price.toFixed(2)}`;
+                    document.getElementById('buyItemStock').textContent = `${data.stock} in stock`;
+                    document.getElementById('subtotalPrice').textContent = `$${item.price.toFixed(2)}`;
+                    document.getElementById('totalPrice').textContent = `$${item.price.toFixed(2)}`;
+                    
+                    // Store current item ID
+                    document.getElementById('buyNowModal').dataset.itemId = itemId;
+                    
+                    // Reset form
+                    document.getElementById('redeemCodeInput').value = '';
+                    document.getElementById('discountAmount').textContent = '-$0.00';
+                    document.getElementById('redeemMessage').innerHTML = '';
+                    document.getElementById('purchaseResult').style.display = 'none';
+                    document.querySelector('.buy-form').style.display = 'block';
+                    
+                    // Show modal
+                    document.getElementById('buyNowModal').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load item details');
+            }
+        }
+        
+        // Apply redeem code
+        document.getElementById('applyRedeemBtn').addEventListener('click', async function() {
+            const code = document.getElementById('redeemCodeInput').value.trim();
+            const itemId = document.getElementById('buyNowModal').dataset.itemId;
+            
+            if (!code) {
+                showRedeemMessage('Please enter a promo code', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/check-redeem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: code })
+                });
+                
+                const data = await response.json();
+                
+                if (data.valid) {
+                    // Get current price
+                    const currentPrice = parseFloat(document.getElementById('buyItemPrice').textContent.replace('$', ''));
+                    const discount = data.amount;
+                    const newTotal = Math.max(0, currentPrice - discount);
+                    
+                    // Update prices
+                    document.getElementById('discountAmount').textContent = `-$${discount.toFixed(2)}`;
+                    document.getElementById('totalPrice').textContent = `$${newTotal.toFixed(2)}`;
+                    
+                    showRedeemMessage(`Discount of $${discount.toFixed(2)} applied!`, 'success');
+                } else {
+                    showRedeemMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showRedeemMessage('Error applying code', 'error');
+            }
+        });
+        
+        function showRedeemMessage(message, type) {
+            const messageDiv = document.getElementById('redeemMessage');
+            messageDiv.innerHTML = `
+                <div class="message ${type}">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                    ${message}
+                </div>
+            `;
+        }
+        
+        // Confirm purchase
+        document.getElementById('confirmPurchaseBtn').addEventListener('click', async function() {
+            const itemId = document.getElementById('buyNowModal').dataset.itemId;
+            const redeemCode = document.getElementById('redeemCodeInput').value.trim();
+            
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
+            try {
+                const response = await fetch(`/buy/${itemId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        redeem_code: redeemCode || null 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show success screen
+                    document.querySelector('.buy-form').style.display = 'none';
+                    document.getElementById('purchaseResult').style.display = 'block';
+                    
+                    // Fill account details
+                    document.getElementById('resultUID').textContent = data.uid;
+                    document.getElementById('resultPassword').textContent = data.password;
+                    document.getElementById('resultOrderId').textContent = data.order_id;
+                    
+                    // Initialize copy buttons
+                    initializeCopyButtons();
+                } else {
+                    alert('Purchase failed: ' + data.error);
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-lock"></i> Complete Purchase';
+                }
+            } catch (error) {
+                alert('Error processing payment');
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-lock"></i> Complete Purchase';
+            }
+        });
+        
+        function initializeCopyButtons() {
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-clipboard-target');
+                    const text = document.querySelector(targetId).textContent;
+                    
+                    navigator.clipboard.writeText(text).then(() => {
+                        const originalHTML = this.innerHTML;
+                        this.innerHTML = '<i class="fas fa-check"></i>';
+                        
+                        setTimeout(() => {
+                            this.innerHTML = originalHTML;
+                        }, 2000);
+                    });
+                });
+            });
+        }
+        
+        function printCredentials() {
+            window.print();
+        }
+        
+        // Modal close functionality
+        document.querySelectorAll('.modal .close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
+        
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        });
+        
+        // Cart functionality
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        
+        function addToCart(itemId) {
+            // Check if already in cart
+            if (cart.includes(itemId)) {
+                alert('Item already in cart!');
+                return;
+            }
+            
+            cart.push(itemId);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            
+            // Show success message
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>Item added to cart!</span>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        function updateCartCount() {
+            const cartCount = document.querySelector('.cart-count');
+            if (cartCount) {
+                cartCount.textContent = cart.length;
+            }
+        }
+        
+        // Initialize cart count
+        updateCartCount();
+    </script>
+</body>
+</html>
