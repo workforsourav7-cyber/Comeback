@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Item - Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .add-item-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .image-preview {
+            width: 218px;
+            height: 218px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        .region-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .region-btn {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .region-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .account-format {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="add-item-container">
+        <div class="form-header">
+            <h1><i class="fas fa-plus-circle"></i> Add New Account Item</h1>
+            <p>Fill all details to add new account listing</p>
+        </div>
+        
+        <form action="/admin/add_item" method="POST" enctype="multipart/form-data">
+            <!-- Image Upload -->
+            <div class="form-group full-width">
+                <label><i class="fas fa-image"></i> Item Image (Required - 218x218 pixels)</label>
+                <input type="file" name="image" accept="image/*" required 
+                       onchange="previewImage(this)">
+                <div class="image-preview" id="imagePreview">
+                    <span>Preview will appear here</span>
+                </div>
+                <small>Image must be exactly 218x218 pixels</small>
+            </div>
+            
+            <div class="form-grid">
+                <!-- Item Name -->
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Item Name</label>
+                    <input type="text" name="name" placeholder="e.g., Premium Netflix Account" required>
+                </div>
+                
+                <!-- Item ID -->
+                <div class="form-group">
+                    <label><i class="fas fa-hashtag"></i> Item ID</label>
+                    <input type="text" name="item_id" placeholder="e.g., NETFLIX-001" required>
+                </div>
+            </div>
+            
+            <!-- Description -->
+            <div class="form-group full-width">
+                <label><i class="fas fa-align-left"></i> Description</label>
+                <textarea name="description" rows="4" 
+                          placeholder="Describe the account features, benefits, etc."></textarea>
+            </div>
+            
+            <!-- Region Selection -->
+            <div class="form-group full-width">
+                <label><i class="fas fa-globe"></i> Region</label>
+                <div class="region-buttons">
+                    <div class="region-btn" onclick="selectRegion('IND')">IND</div>
+                    <div class="region-btn" onclick="selectRegion('PK')">PK</div>
+                </div>
+                <input type="hidden" name="region" id="region" required>
+            </div>
+            
+            <!-- Accounts List -->
+            <div class="form-group full-width">
+                <label><i class="fas fa-users"></i> Accounts List (One per line)</label>
+                <div class="account-format">
+4428306395:DANGER-SUNND8VT9-CORE
+4428306398:DANGER-RILYC4G9K-CORE
+4428306489:DANGER-STZAEYJZG-CORE
+                </div>
+                <textarea name="accounts" rows="8" 
+                          placeholder="Enter accounts in format: uid:password&#10;Example: 4428306395:DANGER-SUNND8VT9-CORE"
+                          required></textarea>
+            </div>
+            
+            <!-- Price -->
+            <div class="form-group">
+                <label><i class="fas fa-dollar-sign"></i> Price ($)</label>
+                <input type="number" name="price" step="0.01" min="0" placeholder="e.g., 9.99" required>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-save"></i> Save Item
+            </button>
+        </form>
+    </div>
+    
+    <script>
+        let selectedRegion = '';
+        
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        function selectRegion(region) {
+            selectedRegion = region;
+            document.getElementById('region').value = region;
+            
+            // Update button styles
+            document.querySelectorAll('.region-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === region) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        // Auto-generate ID if empty
+        document.querySelector('[name="item_id"]').addEventListener('blur', function() {
+            if (!this.value) {
+                const name = document.querySelector('[name="name"]').value;
+                const id = name.toUpperCase().replace(/[^A-Z0-9]/g, '-') + '-' + 
+                          Math.random().toString(36).substr(2, 5).toUpperCase();
+                this.value = id;
+            }
+        });
+    </script>
+</body>
+</html>
