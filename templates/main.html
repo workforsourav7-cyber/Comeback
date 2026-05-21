@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>UID/JWT Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0a0608;
+            --surface: #120a0c;
+            --card: #1a0e10;
+            --border: rgba(232,48,74,0.15);
+            --accent: #e8304a;
+            --accent2: #ff6b35;
+            --accent-soft: rgba(232,48,74,0.12);
+            --green: #00e5a0;
+            --text: #f0e8ea;
+            --muted: #7a6068;
+            --font-head: 'Rajdhani', sans-serif;
+            --font-mono: 'Share Tech Mono', monospace;
+            --font-body: 'Exo 2', sans-serif;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        body {
+            background: var(--bg); color:var(--text);
+            font-family:var(--font-body); min-height:100vh;
+            display:flex; align-items:center; justify-content:center;
+            padding:20px; overflow-x:hidden;
+        }
+        canvas#bg-canvas { position:fixed; inset:0; z-index:0; opacity:0.45; pointer-events:none; }
+        .orb { position:fixed; border-radius:50%; filter:blur(120px); pointer-events:none; z-index:0; }
+        .orb-1 { width:500px; height:500px; background:var(--accent); opacity:0.06; top:-150px; right:-100px; }
+        .orb-2 { width:400px; height:400px; background:var(--accent2); opacity:0.04; bottom:0; left:-100px; }
+
+        .container { position:relative; z-index:10; width:100%; max-width:440px; }
+
+        .brand-top { text-align:center; margin-bottom:32px; animation:fade-up 0.6s ease; }
+        .brand-icon {
+            width:72px; height:72px;
+            background:linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius:22px; display:inline-flex; align-items:center; justify-content:center;
+            font-size:30px; color:white; box-shadow:0 0 32px rgba(232,48,74,0.5);
+            animation:pulse-logo 3s ease-in-out infinite; margin-bottom:16px;
+        }
+        @keyframes pulse-logo { 0%,100%{box-shadow:0 0 28px rgba(232,48,74,0.5);}50%{box-shadow:0 0 50px rgba(232,48,74,0.8);} }
+        .brand-name { font-family:var(--font-head); font-size:28px; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:#fff; }
+        .brand-name span { color:var(--accent); }
+        .brand-sub { font-family:var(--font-mono); font-size:11px; color:var(--muted); letter-spacing:2px; margin-top:5px; }
+
+        /* Status badge */
+        .proxy-status {
+            display:inline-flex; align-items:center; gap:8px;
+            background:var(--accent-soft); border:1px solid rgba(232,48,74,0.3);
+            border-radius:100px; padding:7px 18px; margin-bottom:28px;
+            font-family:var(--font-mono); font-size:11px; color:var(--accent); letter-spacing:1px;
+        }
+        .status-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); animation:blink 1.5s infinite; }
+        @keyframes blink { 0%,100%{opacity:1;}50%{opacity:0.2;} }
+
+        /* Main card */
+        .main-card {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:24px; padding:36px 26px;
+            box-shadow:0 24px 64px rgba(0,0,0,0.6);
+            position:relative; overflow:hidden;
+            text-align:center; animation:fade-up 0.7s ease;
+        }
+        .main-card::before {
+            content:''; position:absolute; top:0; left:0; right:0; height:2px;
+            background:linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+        }
+
+        .card-title { font-family:var(--font-head); font-size:26px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+        .card-sub { font-size:13px; color:var(--muted); margin-bottom:36px; line-height:1.6; }
+
+        /* Connect button */
+        .connect-btn {
+            width:100%; padding:18px;
+            background:linear-gradient(135deg, var(--accent), #c0203a);
+            color:white; border:none; border-radius:14px;
+            font-family:var(--font-head); font-size:18px; font-weight:700;
+            letter-spacing:3px; text-transform:uppercase; cursor:pointer;
+            transition:0.3s; position:relative; overflow:hidden;
+            box-shadow:0 6px 28px rgba(232,48,74,0.4);
+            display:flex; align-items:center; justify-content:center; gap:12px;
+            margin-bottom:14px;
+        }
+        .connect-btn::before {
+            content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+            background:linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+            transition:0.5s;
+        }
+        .connect-btn:hover { transform:translateY(-2px); box-shadow:0 12px 36px rgba(232,48,74,0.55); }
+        .connect-btn:hover::before { left:100%; }
+        .connect-btn:active { transform:scale(0.98); }
+
+        .btn-text { transition:opacity 0.2s; }
+        .spinner,.cross-icon,.check-icon { display:none; }
+        .spinner { width:22px; height:22px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; }
+        @keyframes spin { to{transform:rotate(360deg);} }
+        .connect-btn.loading .btn-text { opacity:0; }
+        .connect-btn.loading .spinner { display:block; position:absolute; }
+        .connect-btn.cross .btn-text { opacity:0; }
+        .connect-btn.cross .cross-icon { display:block; }
+        .connect-btn.check .btn-text { opacity:0; }
+        .connect-btn.check .check-icon { display:block; }
+
+        /* Cert button */
+        .cert-btn {
+            width:100%; padding:14px;
+            background:rgba(255,255,255,0.04); border:1px solid var(--border);
+            color:var(--muted); border-radius:14px;
+            font-family:var(--font-head); font-size:14px; font-weight:600;
+            letter-spacing:1px; cursor:pointer; transition:0.2s;
+            display:flex; align-items:center; justify-content:center; gap:10px;
+        }
+        .cert-btn:hover { background:var(--accent-soft); border-color:rgba(232,48,74,0.3); color:var(--accent); }
+
+        .info-text { font-family:var(--font-mono); font-size:11px; color:var(--muted); margin-top:16px; line-height:1.6; }
+
+        /* Feature pills row */
+        .features-row {
+            display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:24px 0 0;
+        }
+        .feat-pill {
+            display:inline-flex; align-items:center; gap:6px;
+            background:rgba(232,48,74,0.08); border:1px solid rgba(232,48,74,0.18);
+            border-radius:100px; padding:5px 12px;
+            font-family:var(--font-mono); font-size:10px; color:var(--muted);
+            letter-spacing:0.5px;
+        }
+        .feat-pill i { color:var(--accent); font-size:10px; }
+
+        @keyframes fade-up { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        <div class="brand-top">
+            <div class="brand-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="brand-name">UID <span>&</span> JWT</div>
+            <div class="brand-sub">// SECURE PROXY AUTHENTICATION SYSTEM</div>
+        </div>
+
+        <div class="main-card">
+            <div class="proxy-status">
+                <span class="status-dot"></span>
+                PROXY ACTIVE &nbsp;|&nbsp; PORT 20335
+            </div>
+
+            <div class="card-title">UID & JWT Manager</div>
+            <div class="card-sub">Secure Proxy Authentication System.<br>Connect to access the management panel.</div>
+
+            <button class="connect-btn" id="connectBtn">
+                <span class="btn-text"><i class="fa-solid fa-plug" style="margin-right:8px;"></i>▶ CONNECT NOW</span>
+                <div class="spinner"></div>
+                <svg class="cross-icon" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                <svg class="check-icon" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </button>
+
+            <button class="cert-btn" id="certBtn">
+                <i class="fa-solid fa-download"></i> Download SSL Certificate
+            </button>
+
+            <div class="info-text">Install certificate on your device to fix TLS errors</div>
+
+            <div class="features-row">
+                <span class="feat-pill"><i class="fa-solid fa-lock"></i> SECURE</span>
+                <span class="feat-pill"><i class="fa-solid fa-bolt"></i> FAST</span>
+                <span class="feat-pill"><i class="fa-solid fa-server"></i> PORT 20335</span>
+                <span class="feat-pill"><i class="fa-solid fa-circle-check"></i> ACTIVE</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+    (function() {
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        const CHARS = ['01','10','0x','FF','>>','<<','{}','//','&&','||','!=','=='];
+        const SYMBOLS = ['◈','◉','◎','▸','⬡','⊕','⊗','⌬','⎔'];
+        let W, H, particles = [];
+        function resize() { W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+        resize(); window.addEventListener('resize', resize);
+        function mkP() {
+            const isS=Math.random()>0.5, pool=isS?SYMBOLS:CHARS;
+            return { x:Math.random()*W, y:Math.random()*H, char:pool[Math.floor(Math.random()*pool.length)],
+                size:Math.random()*8+6, color:Math.random()<0.5?'#e8304a':Math.random()<0.6?'rgba(232,48,74,0.5)':'rgba(255,255,255,0.1)',
+                alpha:Math.random()*0.5+0.1, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5,
+                pulse:Math.random()*Math.PI*2, ps:Math.random()*0.03+0.01, ct:Math.random()*120, isS, pool };
+        }
+        for(let i=0;i<70;i++) particles.push(mkP());
+        function draw() {
+            ctx.clearRect(0,0,W,H);
+            particles.forEach(p => {
+                p.pulse+=p.ps; p.ct--;
+                if(p.ct<=0){p.char=p.pool[Math.floor(Math.random()*p.pool.length)];p.ct=Math.random()*100+40;}
+                p.x+=p.vx; p.y+=p.vy;
+                if(p.x<-20)p.x=W+10; if(p.x>W+20)p.x=-10;
+                if(p.y<-20)p.y=H+10; if(p.y>H+20)p.y=-10;
+                ctx.save(); ctx.globalAlpha=p.alpha*(0.6+0.4*Math.sin(p.pulse));
+                ctx.font=`${p.isS?'':'bold '}${p.size}px 'Share Tech Mono',monospace`;
+                ctx.fillStyle=p.color; ctx.fillText(p.char,p.x,p.y); ctx.restore();
+            });
+            requestAnimationFrame(draw);
+        }
+        draw();
+    })();
+    </script>
+</body>
+</html>
