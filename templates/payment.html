@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - AccountStore</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .payment-container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .payment-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .payment-title {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .payment-subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .payment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .payment-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .payment-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .order-summary {
+            border-left: 5px solid #667eea;
+        }
+        
+        .payment-methods {
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .item-details {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+        
+        .item-meta {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .price-breakdown {
+            margin: 20px 0;
+        }
+        
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .price-row.total {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            border-bottom: none;
+            border-top: 2px solid #667eea;
+            margin-top: 10px;
+            padding-top: 15px;
+        }
+        
+        .discount-row {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .method-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .method-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .method-option.selected {
+            border-color: #4CAF50;
+            background: #f0f9f0;
+        }
+        
+        .method-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+        
+        .method-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .payment-form {
+            margin-top: 30px;
+        }
+        
+        .form-row {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .form-input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .card-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .pay-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .pay-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .pay-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .secure-payment {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .success-icon {
+            font-size: 80px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        
+        .account-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <i class="fas fa-store"></i>
+                <span>AccountStore</span>
+            </a>
+            <div class="nav-links">
+                <a href="/"><i class="fas fa-home"></i> Home</a>
+                <a href="#" onclick="window.history.back()"><i class="fas fa-shopping-cart"></i> Cart</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="payment-container">
+        <div class="payment-header">
+            <h1 class="payment-title"><i class="fas fa-lock"></i> Secure Checkout</h1>
+            <p class="payment-subtitle">Complete your purchase in just 3 simple steps</p>
+        </div>
+        
+        <div class="payment-grid">
+            <!-- Order Summary -->
+            <div class="payment-card order-summary">
+                <h2 class="section-title">
+                    <i class="fas fa-receipt"></i> Order Summary
+                </h2>
+                
+                <div class="item-details">
+                    <div class="item-image" id="itemImage">
+                        <img src="" alt="Item">
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" id="itemName">Loading...</div>
+                        <div class="item-meta">
+                            <span id="itemId">ID: ---</span> | 
+                            <span id="itemRegion">Region: ---</span>
+                        </div>
+                    </div>
+                    <div class="item-price" id="itemPrice">$0.00</div>
+                </div>
+                
+                <div class="price-breakdown">
+                    <div class="price-row">
+                        <span>Subtotal</span>
+                        <span id="subtotal">$0.00</span>
+                    </div>
+                    <div class="price-row discount-row">
+                        <span>Discount <span id="discountCode"></span></span>
+                        <span>-<span id="discountAmount">$0.00</span></span>
+                    </div>
+                    <div class="price-row">
+                        <span>Service Fee</span>
+                        <span>$0.99</span>
+                    </div>
+                    <div class="price-row total">
+                        <span>TOTAL</span>
+                        <span id="totalAmount">$0.00</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; padding: 15px; background: #f0f7ff; border-radius: 10px;">
+                    <h4><i class="fas fa-shield-alt"></i> What happens next?</h4>
+                    <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                        After successful payment, you'll instantly receive your account credentials. 
+                        The account will be marked as sold and removed from available stock.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Payment Methods -->
+            <div class="payment-card payment-methods">
+                <h2 class="section-title">
+                    <i class="fas fa-credit-card"></i> Payment Method
+                </h2>
+                
+                <div class="method-grid">
+                    <div class="method-option selected" onclick="selectMethod('card')">
+                        <div class="method-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="method-name">Credit Card</div>
+                        <div style="font-size: 0.8em; color: #666;">Visa, Mastercard</div>
+                    </div>
+                    
+                    <div class="method-option" onclick="selectMethod('paypal')">
+                        <div class="method-icon">
+                            <i class="fab fa-paypal"></i>
+                        </div>
+                        <div class="method-name">PayPal</div>
+                        <div style="font-size: 0.8em; color: #666;">Fast & Secure</div>
+                    </div>
+                    
+                    <div class="method-option" onclick="selectMethod('crypto')">
+                        <div class="method-icon">
+                            <i class="fab fa-bitcoin"></i>
+                        </div>
+                        <div class="method-name">Crypto</div>
+                        <div style="font-size: 0.8em; color: #666;">BTC, ETH, USDT</div>
+                    </div>
+                    
+                    <div class="method-option" onclick="selectMethod('skrill')">
+                        <div class="method-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="method-name">Skrill</div>
+                        <div style="font-size: 0.8em; color: #666;">E-Wallet</div>
+                    </div>
+                </div>
+                
+                <!-- Card Form -->
+                <div class="payment-form" id="cardForm">
+                    <div class="form-row">
+                        <label class="form-label">Card Number</label>
+                        <input type="text" 
+                               class="form-input" 
+                               placeholder="1234 5678 9012 3456"
+                               maxlength="19"
+                               oninput="formatCardNumber(this)">
+                    </div>
+                    
+                    <div class="card-details">
+                        <div class="form-row">
+                            <label class="form-label">Expiry Date</label>
+                            <input type="text" 
+                                   class="form-input" 
+                                   placeholder="MM/YY"
+                                   maxlength="5"
+                                   oninput="formatExpiry(this)">
+                        </div>
+                        
+                        <div class="form-row">
+                            <label class="form-label">CVV</label>
+                            <input type="password" 
+                                   class="form-input" 
+                                   placeholder="123"
+                                   maxlength="4">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <label class="form-label">Cardholder Name</label>
+                        <input type="text" 
+                               class="form-input" 
+                               placeholder="John Doe">
+                    </div>
+                </div>
+                
+                <!-- PayPal Form (Hidden) -->
+                <div class="payment-form" id="paypalForm" style="display: none;">
+                    <div style="text-align: center; padding: 30px;">
+                        <i class="fab fa-paypal" style="font-size: 50px; color: #003087;"></i>
+                        <p style="margin: 20px 0; color: #666;">
+                            You will be redirected to PayPal to complete your payment
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Loading -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Processing payment...</p>
+                </div>
+                
+                <!-- Pay Button -->
+                <button class="pay-btn" id="payButton" onclick="processPayment()">
+                    <i class="fas fa-lock"></i> PAY NOW - <span id="payAmount">$0.00</span>
+                </button>
+                
+                <div class="secure-payment">
+                    <i class="fas fa-shield-alt"></i> 256-bit SSL Secured Payment
+                </div>
+            </div>
+        </div>
+        
+        <!-- Success Screen -->
+        <div class="payment-card success-screen" id="successScreen">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            
+            <h2 style="color: #4CAF50; margin-bottom: 10px;">Payment Successful!</h2>
+            <p style="color: #666; margin-bottom: 30px;">
+                Your account details have been generated. Save them securely!
+            </p>
+            
+            <div class="account-details">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-user-circle"></i> Account Credentials</h3>
+                
+                <div class="detail-row">
+                    <span>Item:</span>
+                    <strong id="successItemName">---</strong>
+                </div>
+                
+                <div class="detail-row">
+                    <span>UID:</span>
+                    <code id="successUID" style="font-family: monospace;">---</code>
+                </div>
+                
+                <div class="detail-row">
+                    <span>Password:</span>
+                    <code id="successPassword" style="font-family: monospace;">---</code>
+                </div>
+                
+                <button class="copy-btn" onclick="copyCredentials()">
+                    <i class="fas fa-copy"></i> Copy All Credentials
+                </button>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <button class="pay-btn" onclick="window.location.href='/'" 
+                        style="background: #4CAF50; margin-right: 10px;">
+                    <i class="fas fa-home"></i> Back to Store
+                </button>
+                
+                <button class="pay-btn" onclick="printDetails()" 
+                        style="background: #666;">
+                    <i class="fas fa-print"></i> Print Receipt
+                </button>
+            </div>
+            
+            <p style="margin-top: 30px; color: #999; font-size: 0.9em;">
+                <i class="fas fa-info-circle"></i> 
+                This account has been marked as sold and removed from available stock.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Get item data from URL or localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const itemId = urlParams.get('item') || localStorage.getItem('selectedItem');
+        
+        let selectedMethod = 'card';
+        let discount = localStorage.getItem('redeemDiscount') || 0;
+        let itemData = null;
+        
+        // Load item data
+        async function loadItemData() {
+            if (!itemId) {
+                window.location.href = '/';
+                return;
+            }
+            
+            try {
+                // In real app, fetch from API
+                // Mock data for demo
+                itemData = {
+                    id: itemId,
+                    name: "Premium Netflix Account",
+                    price: 9.99,
+                    region: "IND",
+                    image: "/static/images/sample.png",
+                    description: "4K UHD, 4 screens, Premium package"
+                };
+                
+                updateDisplay();
+            } catch (error) {
+                console.error('Error loading item:', error);
+            }
+        }
+        
+        function updateDisplay() {
+            if (!itemData) return;
+            
+            // Update item info
+            document.getElementById('itemName').textContent = itemData.name;
+            document.getElementById('itemId').textContent = `ID: ${itemData.id}`;
+            document.getElementById('itemRegion').textContent = `Region: ${itemData.region}`;
+            document.getElementById('itemPrice').textContent = `$${itemData.price.toFixed(2)}`;
+            document.getElementById('itemImage').innerHTML = `<img src="${itemData.image}" alt="${itemData.name}">`;
+            
+            // Update prices
+            const subtotal = itemData.price;
+            const discountAmount = parseFloat(discount) || 0;
+            const serviceFee = 0.99;
+            const total = subtotal - discountAmount + serviceFee;
+            
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('discountAmount').textContent = `$${discountAmount.toFixed(2)}`;
+            document.getElementById('totalAmount').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('payAmount').textContent = `$${total.toFixed(2)}`;
+            
+            // Update success screen
+            document.getElementById('successItemName').textContent = itemData.name;
+            
+            // Show discount if exists
+            if (discountAmount > 0) {
+                document.getElementById('discountCode').textContent = `(${localStorage.getItem('redeemCode') || 'CODE'})`;
+            } else {
+                document.querySelector('.discount-row').style.display = 'none';
+            }
+        }
+        
+        function selectMethod(method) {
+            selectedMethod = method;
+            
+            // Update UI
+            document.querySelectorAll('.method-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            // Show appropriate form
+            document.getElementById('cardForm').style.display = method === 'card' ? 'block' : 'none';
+            document.getElementById('paypalForm').style.display = method === 'paypal' ? 'block' : 'none';
+        }
+        
+        function formatCardNumber(input) {
+            let value = input.value.replace(/\D/g, '');
+            let formatted = '';
+            
+            for (let i = 0; i < value.length && i < 16; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formatted += ' ';
+                }
+                formatted += value[i];
+            }
+            
+            input.value = formatted;
+        }
+        
+        function formatExpiry(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length >= 2) {
+                input.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            } else {
+                input.value = value;
+            }
+        }
+        
+        function processPayment() {
+            const button = document.getElementById('payButton');
+            const loading = document.getElementById('loading');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            
+            // Simulate payment processing
+            setTimeout(() => {
+                loading.style.display = 'none';
+                
+                // Generate mock account credentials
+                const uid = '4428306' + Math.floor(Math.random() * 1000);
+                const password = 'DANGER-' + 
+                    Math.random().toString(36).substr(2, 9).toUpperCase() + 
+                    '-CORE';
+                
+                // Show success screen
+                document.getElementById('successUID').textContent = uid;
+                document.getElementById('successPassword').textContent = password;
+                
+                // Hide payment form, show success
+                document.querySelector('.payment-grid').style.display = 'none';
+                document.getElementById('successScreen').style.display = 'block';
+                
+                // Clear used discount
+                localStorage.removeItem('redeemDiscount');
+                localStorage.removeItem('redeemCode');
+                
+                // In real app, call API to mark account as sold
+                console.log('Account sold:', { uid, password, itemId });
+            }, 2000);
+        }
+        
+        function copyCredentials() {
+            const uid = document.getElementById('successUID').textContent;
+            const password = document.getElementById('successPassword').textContent;
+            const itemName = document.getElementById('successItemName').textContent;
+            
+            const text = `Item: ${itemName}\nUID: ${uid}\nPassword: ${password}`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Credentials copied to clipboard!');
+            });
+        }
+        
+        function printDetails() {
+            window.print();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadItemData();
+        });
+        
+        // Auto-select card method
+        selectMethod('card');
+    </script>
+</body>
+</html>
