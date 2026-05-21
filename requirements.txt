@@ -1,5 +1,7 @@
+mitmproxy==10.3.0
+requests==2.32.3
+pycryptodome==3.20.0
+protobuf==5.27.2
 Flask==3.0.3
 flask-cors==4.0.1
-requests==2.32.3
-mitmproxy==10.3.0
 gunicorn==22.0.0
